@@ -1,6 +1,6 @@
 # Parallel
 
-Κατεβαζετε το git στον υπολογιστη. Κανετε clone το repository με αυτο το link https://github.com/iamtsac/DataStructures.git Ξεκινατε να δουλευετε μεσα στον φακελο DataStructures Οταν ειστε ετοιμοι με ενα αρχειο τοτε για να το ανεβασετε κανετε τα εξης:
+Κατεβαζετε το git στον υπολογιστη. Κανετε clone το repository με αυτο το link https://github.com/iamtsac/Parallel.git Ξεκινατε να δουλευετε μεσα στον φακελο DataStructures Οταν ειστε ετοιμοι με ενα αρχειο τοτε για να το ανεβασετε κανετε τα εξης:
 
     git add filename
     git commit filename -m "what's the new change"
