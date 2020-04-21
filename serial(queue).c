@@ -35,21 +35,23 @@ struct node_info * pop (struct queue *q){ //gyrnaei to prwto node_info kai to bg
   q-> size--;
   tmp = q->front;
   q->front = q->front->next;
-  //free(q);
+  //free(tmp);
   return tmp->data;
 }
 
-void push (struct queue *q,struct node_info newData){ //vazei sto telos ths ouras to neo data
+void push (struct queue *q,struct node_info *newData){ //vazei sto telos ths ouras to neo data
   q->size++;
-  if(q->front== NULL){
+  if(q->front==NULL){
     q->front = (struct Node *) malloc(sizeof(struct Node));
-    q->front->data = &newData;
+    q->front->data = (struct node_info *) malloc(sizeof(struct node_info));
+    q->front->data = newData;
     q->front->next= NULL;
     q->rear = q->front;
   }
   else{
     q->rear->next = (struct Node *) malloc(sizeof(struct Node));
-    q->rear->next->data = &newData;
+    q->rear->next->data = (struct node_info *) malloc(sizeof(struct node_info));
+    q->rear->next->data = newData;
     q->rear->next->next = NULL;
     q->rear = q->rear->next;
   }
@@ -134,9 +136,12 @@ struct queue s,l;
 init(&s);
 
 for(int i=0; i< array_size; i++){
-  if(nodes[i].in_edges == 0)
-  push(&s,nodes[i]);
+  if(nodes[i].in_edges == 0){
+  push(&s,&nodes[i]);
+
+  }
 }
+
 
 init(&l);
 
@@ -145,20 +150,27 @@ nodeItem = NULL;
 
 while(s.size > 0){
   nodeItem = pop(&s);
-  push(&l,*nodeItem);
-  printf("%d\n",nodeItem->id);
-  for (int j =0; j<array_size; j++)
-    if( matrix[nodeItem->id-1][j] ){
+  push(&l,nodeItem);
+
+  //printf("%d\n",nodeItem->id);
+
+  for (int j =0; j<array_size; j++){
+    if( matrix[nodeItem->id-1][j] == true ){
       matrix[nodeItem->id-1][j] = false;
       nodes[j].in_edges--;
-      if(nodes[j].in_edges<=0){
-        push(&s,nodes[j]);
+      if(nodes[j].in_edges == 0){
+        push(&s,&nodes[j]);
       }
     }
+  }
+    nodeItem = NULL;
     count++;
 }
 
-
+for(int i=0; i<array_size; i++){
+  nodeItem = pop(&l);
+  printf("%d\n",nodeItem->id);
+}
 
 fclose(fp);
 return 0;
