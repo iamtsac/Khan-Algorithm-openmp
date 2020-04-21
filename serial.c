@@ -48,6 +48,9 @@ int main(void)
   while( ( fgets(data, 500, fp)) !=  NULL ) // until we reach EOF
   {
     fscanf(fp, "%d %d", &temp1, &temp2);
+    if (feof(fp)) {
+    break;
+    }
     matrix[temp1 - 1][temp2 - 1] = true; // initializing edges between nodes
     nodes[temp1 - 1].out_edges++; // setting out-edges of the node
     nodes[temp2 - 1].in_edges++; // setting in-edges of the node
@@ -70,5 +73,6 @@ int main(void)
   }
 
   fclose(fp);
+
 return 0;
 }
