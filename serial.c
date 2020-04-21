@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <ctype.h>
 
 struct node_info{
@@ -20,23 +21,53 @@ int main(void)
     exit(EXIT_FAILURE);
   }
 
-  while( ( fgets(data, 500, fp)) !=  NULL ) //until we reach EOF
+  while( ( fgets(data, 500, fp)) !=  NULL ) // until we reach end of 1st line
   {
-
-    if( line_count == 0 ) //do this if 1st line
-    {
-      fscanf(fp, "%c %d %d", &temp, &array_size, &total_edges);
-      printf("Array size: %d\n",array_size);
-    }
-    else //do this for all other lines
-    {
-      fscanf(fp, "%d %d", &temp1, &temp2);
-      printf("Temp1: %d\tTemp2: %d\n",temp1,temp2);
-    }
-    line_count++;
+    fscanf(fp, "%d %d %d", &array_size, &array_size, &total_edges);
+    break;
   }
 
-  printf("Successfull parsing of data! Line count: %d\n",line_count);
+  struct node_info nodes[array_size]; // array of nodes
+  for(int i=0; i<array_size; i++)
+  {
+    nodes[i].id = i+1;
+    nodes[i].in_edges = 0;
+    nodes[i].out_edges = 0;
+  }
+
+  bool matrix[array_size][array_size]; // array of edges between nodes
+  for(int i=0; i<array_size; i++)
+  {
+    for(int j=0; j<array_size; j++)
+    {
+      matrix[i][j] = false; // initializing all values of the array to be 0 (no relation/edges between nodes)
+    }
+  }
+
+
+  while( ( fgets(data, 500, fp)) !=  NULL ) // until we reach EOF
+  {
+    fscanf(fp, "%d %d", &temp1, &temp2);
+    matrix[temp1 - 1][temp2 - 1] = true; // initializing edges between nodes
+    nodes[temp1 - 1].out_edges++; // setting out-edges of the node
+    nodes[temp2 - 1].in_edges++; // setting in-edges of the node
+  }
+
+  for(int i=0; i<array_size; i++) // printing matrix data
+  {
+    printf("Node %d :\n",i+1);
+    for(int j=0; j<array_size; j++)
+    {
+      if(i != j)
+      printf("-> Node %d : %d\n",j+1,matrix[i][j]);
+    }
+    printf("\n\n\n");
+  }
+
+  for(int i=0; i<array_size; i++) // printing node data
+  {
+    printf("id: %d\tout_edges: %d\tin_edges: %d\n",nodes[i].id, nodes[i].out_edges, nodes[i].in_edges);
+  }
 
   fclose(fp);
 return 0;
