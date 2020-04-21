@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <stdbool.h>
 
 struct node_info{
 int id;
@@ -26,7 +27,7 @@ void init(struct queue *q){ //dhmiourgei thn oura
 }
 
 int front(struct queue *q){ //gyrnaei to prwto node info xwris na to petaksei
-  return q->front->data->out_edges;
+  return q->front->data->id;
 }
 
 struct node_info * pop (struct queue *q){ //gyrnaei to prwto node_info kai to bgazei ektos ouras
@@ -55,6 +56,8 @@ void push (struct queue *q,struct node_info newData){ //vazei sto telos ths oura
 }
 
 
+
+
 int main(void)
 {
   int array_size, total_edges, temp1, temp2, line_count = 0;
@@ -68,12 +71,12 @@ int main(void)
     exit(EXIT_FAILURE);
   }
 
-  while( fgets(data, 500, fp)) // until we reach end of 1st line
-  {
-    fscanf(fp, "%d %d %d", &array_size, &array_size, &total_edges);
-    printf("Array size: %d",array_size);
-    break;
-  }
+  while( ( fgets(data, 500, fp))) //read until we reach end of line
+ {
+     fscanf(fp, "%d %d %d", &array_size, &array_size, &total_edges);
+     printf("Array size: %d x %d with %d edges\n",array_size,array_size,total_edges);
+     break;
+ }
 
   struct node_info nodes[array_size]; // array of nodes
   struct queue q;
@@ -86,7 +89,7 @@ int main(void)
     nodes[i].out_edges = 0;
   }
 
-  int matrix[array_size][array_size]; // array of edges between nodes
+  bool matrix[array_size][array_size]; // array of edges between nodes
   for(int i=0; i<array_size; i++)
   {
     for(int j=0; j<array_size; j++)
@@ -99,9 +102,12 @@ int main(void)
   while( ( fgets(data, 500, fp)) !=  NULL ) // until we reach EOF
   {
     fscanf(fp, "%d %d", &temp1, &temp2);
-    matrix[temp1 - 1][temp2 - 1] = 1; // initializing edges between nodes
+    if(feof(fp))
+    break;
+    matrix[temp1 - 1][temp2 - 1] = true; // initializing edges between nodes
     nodes[temp1 - 1].out_edges++; // setting out-edges of the node
     nodes[temp2 - 1].in_edges++; // setting in-edges of the node
+
   }
 
   printf("Successfull parsing of data! Line count: %d\n",line_count);
@@ -123,8 +129,37 @@ int main(void)
 
 
 //Topological Sort
+int count =0;
+struct queue s,l;
+init(&s);
+
+for(int i=0; i< array_size; i++){
+  if(nodes[i].in_edges == 0)
+  push(&s,nodes[i]);
+}
+
+init(&l);
+
+struct node_info  *nodeItem;
+nodeItem = NULL;
+
+while(s.size > 0){
+  nodeItem = pop(&s);
+  push(&l,*nodeItem);
+  printf("%d\n",nodeItem->id);
+  for (int j =0; j<array_size; j++)
+    if( matrix[nodeItem->id-1][j] ){
+      matrix[nodeItem->id-1][j] = false;
+      nodes[j].in_edges--;
+      if(nodes[j].in_edges<=0){
+        push(&s,nodes[j]);
+      }
+    }
+    count++;
+}
 
 
-  fclose(fp);
+
+fclose(fp);
 return 0;
 }
