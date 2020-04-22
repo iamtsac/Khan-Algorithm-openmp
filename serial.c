@@ -3,7 +3,7 @@
 #include <ctype.h>
 #include <stdbool.h>
 
-int array_size;
+int array_size, total_edges;
 
 struct node_info{
 int id;
@@ -62,33 +62,21 @@ struct queue Kahn_Algorithm(struct queue *L, struct queue *S, struct node_info n
 {
 
     while(S->size > 0){
+      int count = 0;
       struct node_info *n = pop(S);
       push(L,n);
-      int count=0;
-      int* temp=malloc(array_size *sizeof(int));
       for (int i=0; i<array_size; i++)
       {
-            if( matrix[n->id - 1][i] == 1 )
-            {
-                count++;
-                matrix[n->id - 1][i] = false;
-                nodes[i].in_edges--;
-                nodes[n->id - 1].out_edges--;
-                temp[count-1]=nodes[i].id;
-              }
-          temp[count]=-1;
-          for(int j=0; j<array_size; j++)
-          {
-
-              if(temp[j]==-1) break;
-              else
-              {
-                if(nodes[j].in_edges==0)
-                push(S,&nodes[j]);
-              }
-          }
+        if( matrix[n->id - 1][i] == 1 )
+        {
+          matrix[n->id - 1][i] = false;
+          nodes[i].in_edges--;
+          nodes[n->id - 1].out_edges--;
+          if(nodes[i].in_edges == 0)
+          push(S,&nodes[i]);
+        }
       }
-    free(temp);
+      count++;
     }
 
     if(L->size < array_size)
@@ -98,10 +86,11 @@ struct queue Kahn_Algorithm(struct queue *L, struct queue *S, struct node_info n
     }
     else
     {
-      printf("Successful!\n");
+      printf("Successful!\nThe Topological sort is: ");
       return *L;
     }
 }
+
 
 /****************************************************************/
 /****************************************************************/
@@ -112,7 +101,7 @@ struct queue Kahn_Algorithm(struct queue *L, struct queue *S, struct node_info n
 
 int main(void)
 {
-  int total_edges, temp1, temp2;
+  int temp1, temp2;
   char data[500];
 
 
@@ -194,8 +183,9 @@ int main(void)
   struct node_info  *nodeItem;
   for(int i=0; i<array_size; i++){
   nodeItem = pop(&L);
-  printf("%d\n",nodeItem->id);
+  printf("%d ",nodeItem->id);
 }
+  printf("\n");
 
   fclose(fp);
 return 0;
