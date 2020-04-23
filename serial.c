@@ -1,22 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
-<<<<<<< HEAD
-#include <stdbool.h>
-#include <ctype.h>
-=======
 #include <ctype.h>
 #include <stdbool.h>
 
 int array_size, total_edges;
->>>>>>> a65c966bf5c42d123f801e0ba0926899ec58a5d2
 
 struct node_info{
 int id;
 int out_edges;
 int in_edges;
-<<<<<<< HEAD
-}node;
-=======
 };
 
 struct Node{
@@ -105,20 +97,14 @@ struct queue Kahn_Algorithm(struct queue *L, struct queue *S, struct node_info n
 /***************************** ΜΑΙΝ *****************************/
 /****************************************************************/
 /****************************************************************/
->>>>>>> a65c966bf5c42d123f801e0ba0926899ec58a5d2
 
 
 int main(void)
 {
-<<<<<<< HEAD
-  int array_size, total_edges, temp1, temp2, line_count = 0;
-  char data[500], temp;
-=======
   int temp1, temp2;
   char data[500];
 
 
->>>>>>> a65c966bf5c42d123f801e0ba0926899ec58a5d2
   FILE *fp = fopen("data.txt", "r");
   if(fp == NULL)
   {
@@ -126,15 +112,6 @@ int main(void)
     exit(EXIT_FAILURE);
   }
 
-<<<<<<< HEAD
-  while( ( fgets(data, 500, fp)) !=  NULL ) // until we reach end of 1st line
-  {
-    fscanf(fp, "%d %d %d", &array_size, &array_size, &total_edges);
-    break;
-  }
-
-  struct node_info nodes[array_size]; // array of nodes
-=======
   while( (fgets(data, 500, fp))) //read until we reach end of line
  {
      fscanf(fp, "%d %d %d", &array_size, &array_size, &total_edges);
@@ -146,7 +123,6 @@ int main(void)
   struct queue q;
   init(&q); //create of queue
 
->>>>>>> a65c966bf5c42d123f801e0ba0926899ec58a5d2
   for(int i=0; i<array_size; i++)
   {
     nodes[i].id = i+1;
@@ -159,26 +135,11 @@ int main(void)
   {
     for(int j=0; j<array_size; j++)
     {
-<<<<<<< HEAD
-      matrix[i][j] = false; // initializing all values of the array to be 0 (no relation/edges between nodes)
-=======
       matrix[i][j]=0; // initializing all values of the array to be 0 (no relation/edges between nodes)
->>>>>>> a65c966bf5c42d123f801e0ba0926899ec58a5d2
     }
   }
 
 
-<<<<<<< HEAD
-  while( ( fgets(data, 500, fp)) !=  NULL ) // until we reach EOF
-  {
-    fscanf(fp, "%d %d", &temp1, &temp2);
-    if (feof(fp)) {
-    break;
-    }
-    matrix[temp1 - 1][temp2 - 1] = true; // initializing edges between nodes
-    nodes[temp1 - 1].out_edges++; // setting out-edges of the node
-    nodes[temp2 - 1].in_edges++; // setting in-edges of the node
-=======
   while( (fgets(data, 500, fp)) !=  NULL ) // until we reach EOF
   {
     fscanf(fp, "%d %d", &temp1, &temp2);
@@ -188,43 +149,23 @@ int main(void)
     nodes[temp1 - 1].out_edges++; // setting out-edges of the node
     nodes[temp2 - 1].in_edges++; // setting in-edges of the node
 
->>>>>>> a65c966bf5c42d123f801e0ba0926899ec58a5d2
   }
 
   for(int i=0; i<array_size; i++) // printing matrix data
   {
-<<<<<<< HEAD
-    printf("Node %d :\n",i+1);
-    for(int j=0; j<array_size; j++)
-    {
-      if(i != j)
-      printf("-> Node %d : %d\n",j+1,matrix[i][j]);
-=======
     for(int j=0; j<array_size; j++)
     {
       printf("Node %d -> Node %d : %d\n",i+1,j+1,matrix[i][j]);
->>>>>>> a65c966bf5c42d123f801e0ba0926899ec58a5d2
     }
     printf("\n\n\n");
   }
 
-<<<<<<< HEAD
-=======
   printf("\n\n\n");
->>>>>>> a65c966bf5c42d123f801e0ba0926899ec58a5d2
   for(int i=0; i<array_size; i++) // printing node data
   {
     printf("id: %d\tout_edges: %d\tin_edges: %d\n",nodes[i].id, nodes[i].out_edges, nodes[i].in_edges);
   }
 
-<<<<<<< HEAD
-  fclose(fp);
-
-return 0;
-}
-
-
-=======
   struct queue S, L;
 
   init(&S);
@@ -249,4 +190,4 @@ return 0;
   fclose(fp);
 return 0;
 }
->>>>>>> a65c966bf5c42d123f801e0ba0926899ec58a5d2
+
