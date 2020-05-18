@@ -24,8 +24,8 @@ int main(int argc, char *argv[])
 		int new_nodes = MIN_PER_RANK + (rand () % (MAX_PER_RANK - MIN_PER_RANK + 1));
 
 		/* Edges from old nodes ('nodes') to new ones ('new_nodes').  */
-		for (j = 0; j < nodes; j++) {
-			for (k = 0; k < new_nodes; k++) {
+		for (j = 1; j < (nodes+1); j++) {
+			for (k = 1; k < ( new_nodes+1 ); k++) {
 				if ((rand() % 100) < PERCENT) {
 					fprintf(outfile, "%d %d\n", j, k + nodes);
 					edges++;
