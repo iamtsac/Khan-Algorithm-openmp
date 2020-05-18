@@ -105,7 +105,7 @@ int main(void)
   char data[500];
 
 
-  FILE *fp = fopen("data.txt", "r");
+  FILE *fp = fopen("dag.txt", "r");
   if(fp == NULL)
   {
     perror("Error while opening the file!\n");
@@ -189,5 +189,4 @@ int main(void)
 
   fclose(fp);
 return 0;
-}
-
+} 
