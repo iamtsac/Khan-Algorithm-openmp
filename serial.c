@@ -58,7 +58,7 @@ void push (struct queue *q,struct node_info *newData){ // vazei sto telos ths ou
   }
 }
 
-struct queue Kahn_Algorithm(struct queue *L, struct queue *S, struct node_info nodes[array_size], bool matrix[array_size][array_size])
+struct queue Kahn_Algorithm(struct queue *L, struct queue *S, struct node_info nodes[array_size], bool *matrix)
 {
 
     while(S->size > 0){
@@ -67,9 +67,9 @@ struct queue Kahn_Algorithm(struct queue *L, struct queue *S, struct node_info n
       push(L,n);
       for (int i=0; i<array_size; i++)
       {
-        if( matrix[n->id - 1][i] == 1 )
+        if( matrix[ ( n->id - 1 ) *array_size + i] == 1 )
         {
-          matrix[n->id - 1][i] = false;
+          matrix[ ( n->id - 1 ) *array_size + i] = false;
           nodes[i].in_edges--;
           nodes[n->id - 1].out_edges--;
           if(nodes[i].in_edges == 0)
@@ -111,10 +111,17 @@ struct queue Kahn_Algorithm(struct queue *L, struct queue *S, struct node_info n
 //M::::::M               M::::::M A:::::A                 A:::::A I::::::::IN::::::N        N::::::N
 //MMMMMMMM               MMMMMMMMAAAAAAA                   AAAAAAAIIIIIIIIIINNNNNNNN         NNNNNNN 
 
+double gettime(void) {
+   struct timeval tv;
+   gettimeofday(&tv, NULL);
+   return tv.tv_sec + 1e-6 * tv.tv_usec;
+}
+
 int main(void)
 {
   int temp1, temp2;
   char data[500];
+  double t1,t2;
 
 
   FILE *fp = fopen("dag.txt", "r");
@@ -135,48 +142,52 @@ int main(void)
   struct queue q;
   init(&q); //create of queue
 
+t1=gettime();
   for(int i=0; i<array_size; i++)
   {
+    //printf("hello node");
     nodes[i].id = i+1;
     nodes[i].in_edges = 0;
     nodes[i].out_edges = 0;
   }
 
-  bool matrix[array_size][array_size]; // array of edges between nodes
+  bool *matrix = (bool *)malloc(array_size *array_size * sizeof(bool ));
   for(int i=0; i<array_size; i++)
   {
+    //printf("hello matrix");
     for(int j=0; j<array_size; j++)
     {
-      matrix[i][j]=0; // initializing all values of the array to be 0 (no relation/edges between nodes)
+      matrix[i* array_size + j]=0; // initializing all values of the array to be 0 (no relation/edges between nodes)
     }
-  }
-
+  } 
+t2=gettime();
 
   while( (fgets(data, 500, fp)) !=  NULL ) // until we reach EOF
   {
     fscanf(fp, "%d %d", &temp1, &temp2);
     if(feof(fp))
     break;
-    matrix[temp1 - 1][temp2 - 1] = true; // initializing edges between nodes
+    matrix[(temp1 - 1 )* array_size + ( temp2 - 1 )] = 1;
     nodes[temp1 - 1].out_edges++; // setting out-edges of the node
     nodes[temp2 - 1].in_edges++; // setting in-edges of the node
 
   }
 
-  for(int i=0; i<array_size; i++) // printing matrix data
-  {
-    for(int j=0; j<array_size; j++)
-    {
-      printf("Node %d -> Node %d : %d\n",i+1,j+1,matrix[i][j]);
-    }
-    printf("\n\n\n");
-  }
 
-  printf("\n\n\n");
-  for(int i=0; i<array_size; i++) // printing node data
-  {
-    printf("id: %d\tout_edges: %d\tin_edges: %d\n",nodes[i].id, nodes[i].out_edges, nodes[i].in_edges);
-  }
+//  for(int i=0; i<array_size; i++) // printing matrix data
+//  {
+//    for(int j=0; j<array_size; j++)
+//    {
+//      printf("Node %d -> Node %d : %d\n",i+1,j+1,matrix[i][j]);
+//    }
+//    printf("\n\n\n");
+//  }
+//
+//  printf("\n\n\n");
+//  for(int i=0; i<array_size; i++) // printing node data
+//  {
+//    printf("id: %d\tout_edges: %d\tin_edges: %d\n",nodes[i].id, nodes[i].out_edges, nodes[i].in_edges);
+//  }
 
   struct queue S, L;
 
@@ -199,6 +210,7 @@ int main(void)
 }
   printf("\n");
 
+  printf("time %lf  \n",t2-t1);
   fclose(fp);
 return 0;
 } 
