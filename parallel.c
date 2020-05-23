@@ -64,8 +64,7 @@ void push (struct queue *q,struct node_info *newData){ // vazei sto telos ths ou
 struct queue Kahn_Algorithm(struct queue *L, struct queue *S, struct node_info nodes[array_size], bool *matrix)
 {
 
-    while(S->size > 0){
-      int count = 0;
+    for (int i = 1; i > 0; i++) {
       struct node_info *n = pop(S);
       push(L,n);
       for (int i=0; i<array_size; i++)
@@ -79,7 +78,7 @@ struct queue Kahn_Algorithm(struct queue *L, struct queue *S, struct node_info n
           push(S,&nodes[i]);
         }
       }
-      count++;
+      if(S->size == 0) i=-1;
     }
 
     if(L->size < array_size)
@@ -111,9 +110,8 @@ double gettime(void)
 ██      ██ ██   ██ ██ ██   ████                                   
 */
 
-int main(void)
-{
-  int temp1, temp2;
+int main(void) {
+
   char data[500];
   double t1,t2;
   struct node_info  *nodeItem;
@@ -142,20 +140,28 @@ int main(void)
     nodes[i].out_edges = 0;
   }
 
-  bool *matrix = (bool *)malloc(array_size *array_size * sizeof(bool ));
+  bool *matrix = (bool *)malloc(array_size *array_size * sizeof(bool)); 
+  int* temp1 = (int *)malloc(total_edges * sizeof(int)); 
+  int* temp2 = (int *)malloc(total_edges * sizeof(int)); 
 
-
-
-  while( (fgets(data, 500, fp)) !=  NULL ) // until we reach EOF
+  for(int i=0; i<array_size; i++)
   {
-    fscanf(fp, "%d %d", &temp1, &temp2);
-    if(feof(fp)) break;
+    for(int j=0; j<array_size; j++)
+    {
+      matrix[i* array_size + j]=0; // initializing all values of the array to be 0 (no relation/edges between nodes)
+    }
+  } 
 
-    matrix[(temp1 - 1 )* array_size + ( temp2 - 1 )] = 1;
-    nodes[temp1 - 1].out_edges++; // setting out-edges of the node
-    nodes[temp2 - 1].in_edges++; // setting in-edges of the node
-
-  }
+  for (int i = 1; i > 0; i++) {
+     fgets(data, 500, fp);
+     fscanf(fp, "%d %d", &temp1[i],&temp2[i]);
+     if(feof(fp)) i=-1;
+     matrix[(temp1[i] - 1 )* array_size + ( temp2[i] - 1 )] = 1;
+     nodes[ temp1[i] - 1].out_edges++; // setting out-edges of the node
+     nodes[temp2[i] - 1 ].in_edges++; // setting in-edges of the node 
+     
+     
+  } 
 
 
   init(&S);
@@ -183,6 +189,9 @@ int main(void)
 
   }
 
+  free(matrix);
+  free(temp2);
+  free(temp1);
   printf("\n"); 
   printf("time %lf  \n",t2-t1);
 
@@ -190,10 +199,3 @@ int main(void)
 
   return 0;
 } 
-//  for(int i=0; i<array_size; i++)
-//  {
-//    for(int j=0; j<array_size; j++)
-//    {
-//      matrix[i* array_size + j]=0; // initializing all values of the array to be 0 (no relation/edges between nodes)
-//    }
-//  } 
