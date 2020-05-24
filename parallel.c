@@ -115,7 +115,7 @@ int main(void) {
   char data[500];
   double t1,t2;
   struct node_info  *nodeItem;
-  struct queue q, S, L; 
+  struct queue  S, L; 
   FILE *fp = fopen("dag.txt", "r");
 
   if(fp == NULL)
@@ -129,8 +129,6 @@ int main(void) {
  
   struct node_info nodes[array_size];
 
-  init(&q); //create of queue
-
   t1=gettime();
 
   for(int i=0; i<array_size; i++)
@@ -143,14 +141,6 @@ int main(void) {
   bool *matrix = (bool *)malloc(array_size *array_size * sizeof(bool)); 
   int* temp1 = (int *)malloc(total_edges * sizeof(int)); 
   int* temp2 = (int *)malloc(total_edges * sizeof(int)); 
-
-  for(int i=0; i<array_size; i++)
-  {
-    for(int j=0; j<array_size; j++)
-    {
-      matrix[i* array_size + j]=0; // initializing all values of the array to be 0 (no relation/edges between nodes)
-    }
-  } 
 
   for (int i = 1; i > 0; i++) {
      fgets(data, 500, fp);
@@ -178,7 +168,6 @@ int main(void) {
 
   L = Kahn_Algorithm(&L, &S, nodes, matrix);
 
-  t2=gettime();
 
 
   for(int i=0; i<array_size; i++)
@@ -189,12 +178,11 @@ int main(void) {
 
   }
 
-  free(matrix);
-  free(temp2);
-  free(temp1);
+  t2=gettime();
   printf("\n"); 
   printf("time %lf  \n",t2-t1);
 
+  free(matrix);
   fclose(fp);
 
   return 0;
