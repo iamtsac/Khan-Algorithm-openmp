@@ -9,7 +9,6 @@ int array_size, total_edges;
 //Creating the structs
 struct node_info{
 int id;
-int out_edges;
 int in_edges;
 };
 
@@ -63,17 +62,15 @@ void push (struct queue *q,struct node_info *newData){ // vazei sto telos ths ou
 
 struct queue Kahn_Algorithm(struct queue *L, struct queue *S, struct node_info nodes[array_size], bool *matrix)
 {
-
     for (int i = 1; i > 0; i++) {
       struct node_info *n = pop(S);
       push(L,n);
       for (int i=0; i<array_size; i++)
       {
-        if( matrix[ ( n->id - 1 ) *array_size + i] == 1 )
+        if( matrix[ ( n->id - 1 ) * array_size + i] == 1 )
         {
-          matrix[ ( n->id - 1 ) *array_size + i] = false;
+          matrix[ ( n->id - 1 ) * array_size + i] = false;
           nodes[i].in_edges--;
-          nodes[n->id - 1].out_edges--;
           if(nodes[i].in_edges == 0)
           push(S,&nodes[i]);
         }
@@ -86,6 +83,7 @@ struct queue Kahn_Algorithm(struct queue *L, struct queue *S, struct node_info n
      perror("The graph contains one or more cycles!\n");
      exit(EXIT_FAILURE);
     }
+
     else
     {
       printf("Successful!\nThe Topological sort is: ");
@@ -95,8 +93,8 @@ struct queue Kahn_Algorithm(struct queue *L, struct queue *S, struct node_info n
 
 
 
-double gettime(void) 
-{
+
+double gettime(void) {
    struct timeval tv;
    gettimeofday(&tv, NULL);
    return tv.tv_sec + 1e-6 * tv.tv_usec;
@@ -112,7 +110,7 @@ double gettime(void)
 
 int main(void) {
 
-  char data[500];
+  static char data[500];
   double t1,t2;
   struct node_info  *nodeItem;
   struct queue  S, L; 
@@ -127,7 +125,7 @@ int main(void) {
   fscanf(fp, "%d %d %d", &array_size, &array_size, &total_edges);
   printf("Array size: %d x %d with %d edges\n",array_size,array_size,total_edges);
  
-  struct node_info nodes[array_size];
+  struct node_info *nodes=(struct node_info *)malloc(array_size* sizeof(struct node_info));
 
   t1=gettime();
 
@@ -135,24 +133,19 @@ int main(void) {
   {
     nodes[i].id = i+1;
     nodes[i].in_edges = 0;
-    nodes[i].out_edges = 0;
   }
 
   bool *matrix = (bool *)malloc(array_size *array_size * sizeof(bool)); 
   int* temp1 = (int *)malloc(total_edges * sizeof(int)); 
   int* temp2 = (int *)malloc(total_edges * sizeof(int)); 
 
-  for (int i = 1; i > 0; i++) {
+  
+  for (int i = 0; i <total_edges; i++) {
      fgets(data, 500, fp);
      fscanf(fp, "%d %d", &temp1[i],&temp2[i]);
-     if(feof(fp)) i=-1;
      matrix[(temp1[i] - 1 )* array_size + ( temp2[i] - 1 )] = 1;
-     nodes[ temp1[i] - 1].out_edges++; // setting out-edges of the node
      nodes[temp2[i] - 1 ].in_edges++; // setting in-edges of the node 
-     
-     
   } 
-
 
   init(&S);
 
@@ -182,7 +175,6 @@ int main(void) {
   printf("\n"); 
   printf("time %lf  \n",t2-t1);
 
-  free(matrix);
   fclose(fp);
 
   return 0;
