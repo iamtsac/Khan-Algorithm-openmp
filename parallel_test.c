@@ -17,49 +17,7 @@ struct Node{
   struct Node *next;
 };
 
-struct queue{
-  struct Node *front;
-  struct Node *rear;
-  unsigned int size;
-};
-
-void init(struct queue *q){ // creating queue
-  q->front = NULL;
-  q->rear = NULL;
-  q->size = 0;
-}
-
-int front(struct queue *q){ // gyrnaei to prwto node info xwris na to petaksei
-  return q->front->data->id;
-}
-
-struct node_info * pop (struct queue *q){ // gyrnaei to prwto node_info kai to bgazei ektos ouras
-  struct Node *tmp;
-  q-> size--;
-  tmp = q->front;
-  q->front = q->front->next;
-  return tmp->data;
-}
-
-void push (struct queue *q,struct node_info *newData){ // vazei sto telos ths ouras to neo data
-  q->size++;
-  if(q->front==NULL){
-    q->front = (struct Node *) malloc(sizeof(struct Node));
-    q->front->data = (struct node_info *) malloc(sizeof(struct node_info));
-    q->front->data = newData;
-    q->front->next= NULL;
-    q->rear = q->front;
-  }
-  else{
-    q->rear->next = (struct Node *) malloc(sizeof(struct Node));
-    q->rear->next->data = (struct node_info *) malloc(sizeof(struct node_info));
-    q->rear->next->data = newData;
-    q->rear->next->next = NULL;
-    q->rear = q->rear->next;
-  }
-}
-
-struct queue Kahn_Algorithm(struct queue *L,  struct node_info nodes[array_size], bool *matrix);
+int* Kahn_Algorithm(int *L,  struct node_info nodes[array_size], bool *matrix);
 
 
 double gettime(void) {
@@ -69,21 +27,11 @@ double gettime(void) {
 }
 
 
-/* 
-███    ███  █████  ██ ███    ██ 
-████  ████ ██   ██ ██ ████   ██ 
-██ ████ ██ ███████ ██ ██ ██  ██ 
-██  ██  ██ ██   ██ ██ ██  ██ ██ 
-██      ██ ██   ██ ██ ██   ████                                   
-*/
-
 int main(void) {
 
-  int iter ; 
-  static char data[50];
+  int iter,nodeItem;  
+  static char data[500];
   double t1,t2;
-  struct node_info  *nodeItem;
-  struct queue   L; 
   FILE *fp = fopen("dag.txt", "r");
 
   if(fp == NULL)
@@ -105,34 +53,21 @@ int main(void) {
   }
 
   bool *matrix = (bool *)malloc(array_size *array_size * sizeof(bool)); 
+  int *Larray=(int *)malloc(array_size * sizeof(int));
   int* temp1 = (int *)malloc(total_edges * sizeof(int)); 
   int* temp2 = (int *)malloc(total_edges * sizeof(int)); 
      
-       for( iter=0; iter<total_edges-1; iter++){ 
-
-     fgets(data, 50, fp); 
+  for( iter=0; iter<total_edges; iter++){ 
+     fgets(data, sizeof(data), fp); 
      fscanf(fp, "%d %d", &temp1[iter],&temp2[iter]); 
      matrix[(temp1[iter] - 1 )* array_size + ( temp2[iter] - 1 )] = 1;
      nodes[temp2[iter] - 1 ].in_edges++; // setting in-edges of the node 
-      }
-  
-  
-
-  //init(&S);
-
-
-  init(&L);
+  }
 
   t1=gettime();
-  L = Kahn_Algorithm(&L,  nodes, matrix); 
+  Larray = Kahn_Algorithm(Larray,  nodes, matrix); 
   t2=gettime();
 
-
-  for(int i=0; i<array_size; i++)
-  {
-    nodeItem = pop(&L);
-    //printf("%d ",nodeItem->id);
-  }
 
   printf("\n"); 
   printf("time %lf  \n",t2-t1);
@@ -142,54 +77,73 @@ int main(void) {
   return 0;
 }
 
-struct queue Kahn_Algorithm(struct queue *L,  struct node_info nodes[array_size], bool *matrix)
+int* Kahn_Algorithm(int *Larray,  struct node_info nodes[array_size], bool *matrix)
+{ 
+  int *Sarray=(int *)malloc(array_size * (sizeof(int)));
+  int counter=0,i=0;
+
+#pragma omp parallel shared(array_size,matrix,Larray,counter,Sarray)
 {
-#pragma omp parallel num_threads(4) shared(matrix,nodes,L,array_size) 
-  {
-    struct queue S;
-    init(&S);
-  for(int i=0; i< array_size; i++)
-  {
-
-    if(nodes[i].in_edges == 0)
-    #pragma omp critical
-    push(&S, &nodes[i]);
-
+  int tid=omp_get_thread_num();
+  int ssubarray[array_size];
+  int start = tid*(array_size/omp_get_num_threads());
+  int end;
+  if (tid < 3) {
+    end=(tid+1)*(array_size/4); 
   }
-    int tid = omp_get_thread_num();
-     printf("Hello world from omp thread %d\n", tid);
-         
-    for (int i = 1; i > 0; i++) 
-    {
-      struct node_info *n = pop(&S);
-      printf("%d \n",n->id);
+  else {
+    end=array_size;
+  }
+
+#pragma omp for reduction(+:Sarray[:array_size])
+  for(int i=0; i<array_size; i++)
+  {
+    if(nodes[i].in_edges == 0)
+    { 
 #pragma omp critical
-      push(L,n);
-      for (int i=0; i<array_size; i++)
-      {
-        if( matrix[ ( n->id - 1 ) * array_size + i] == 1 )
-        {
-          matrix[ ( n->id - 1 ) * array_size + i] = false;
-          nodes[i].in_edges--;
-          if(nodes[i].in_edges == 0)
-            push(&S,&nodes[i]);
-
-        }
-      }
-   //   if(S->size == 0) i=-1;
-    }
-   } 
-
-    if(L->size < array_size)
-    {
-     perror("The graph contains one or more cycles!\n");
-     exit(EXIT_FAILURE);
-    }
-
-    else
-    {
-      printf("Successful!\nThe Topological sort is: ");
-      return *L;
-    }
-
+      Sarray[counter]=nodes[i].id;
+      counter++;
+    } 
+  }  
 }
+
+for (int i = 0; i < array_size; ++i) {
+  printf("%d\n",Sarray[i]);
+}
+    for(int k=0; k<array_size; k++)
+    { 
+      int n=Sarray[i];
+      Larray[i]=n;
+      counter--,i++;
+      for (int j=0; j<array_size; j++)
+      {
+        if( matrix[ ( n - 1 ) * array_size + j] == 1 )
+        {
+          matrix[ ( n - 1 ) * array_size + j] = false;
+          nodes[j].in_edges--;
+          if(nodes[j].in_edges == 0)
+          {
+            Sarray[counter+i]=nodes[j].id;
+            counter++;
+          }   
+        } 
+      }
+    }
+
+  if(i < array_size)
+  {
+    perror("The graph contains one or more cycles!\n");
+    exit(EXIT_FAILURE);
+  }
+
+  else
+  {
+    
+    printf("Successful!\nThe Topological sort is: ");
+    for(int i=0; i<array_size; i++)
+    {
+      printf("%d ",Larray[i]);
+    }
+  } 
+} 
+
