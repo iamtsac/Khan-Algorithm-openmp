@@ -69,7 +69,7 @@ int main(void) {
 
 
 //printing dag.
- /*for (int i = 0; i < array_size; ++i) {  
+ /*    for (int i = 0; i < array_size; ++i) {  
          printf("\n");
          for (int j = 0; j < array_size; ++j) { 
          printf("%d ",matrix[i * array_size + j]);
@@ -103,15 +103,6 @@ int* Kahn_Algorithm(int *Larray,  struct node_info nodes[array_size], bool *matr
   int *Sarray=(int *)malloc(array_size * (sizeof(int)));
   int counter=0,i=0;
   
-  for(int i=0; i< array_size; i++)
-  {
-    if(nodes[i].in_edges == 0)
-    { 
-      Sarray[counter]=nodes[i].id;
-      printf("id in S=%d in_edges=%d nodesid=%d\n",Sarray[counter],nodes[i].in_edges,nodes[i].id);
-      counter++;
-    } 
-  }  
       while(counter > 0)
       { 
         int n=Sarray[i];
