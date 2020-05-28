@@ -149,7 +149,7 @@ int* Kahn_Algorithm(int *Larray,  struct node_info nodes[array_size], bool *matr
   {
     if(nodes[i].in_edges == 0)
     { 
-      Sarray[i]=nodes[i].id;
+      Sarray[counter]=nodes[i].id;
       printf("id in S=%d in_edges=%d nodesid=%d\n",Sarray[i],nodes[i].in_edges,nodes[i].id);
       counter++;
     } 
