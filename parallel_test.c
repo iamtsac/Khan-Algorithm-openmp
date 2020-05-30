@@ -68,6 +68,10 @@ int main(void) {
   Larray = Kahn_Algorithm(Larray,  nodes, matrix); 
   t2=gettime();
 
+  for(int i=0; i<array_size; i++)
+  {
+    printf("%d ",Larray[i]);
+  }
 
   printf("\n"); 
   printf("time %lf  \n",t2-t1);
@@ -80,9 +84,9 @@ int main(void) {
 int* Kahn_Algorithm(int *Larray,  struct node_info nodes[array_size], bool *matrix)
 { 
   int *Sarray=(int *)malloc(array_size * (sizeof(int)));
-  int counter=0,i=0;
+  unsigned  int counter=0,i=0;
 
-#pragma omp parallel shared(array_size,matrix,Larray,counter,Sarray)
+#pragma omp parallel  num_threads(4) shared(array_size,matrix,Larray,counter,Sarray)
 {
   int tid=omp_get_thread_num();
   int ssubarray[array_size];
@@ -105,32 +109,34 @@ int* Kahn_Algorithm(int *Larray,  struct node_info nodes[array_size], bool *matr
       counter++;
     } 
   }  
-}
 
-for (int i = 0; i < array_size; ++i) {
-  printf("%d\n",Sarray[i]);
-}
-    for(int k=0; k<array_size; k++)
-    { 
-      int n=Sarray[i];
-      Larray[i]=n;
-      counter--,i++;
-      for (int j=0; j<array_size; j++)
+#pragma omp single
+{
+  for(int k=0; k<array_size; k++)
+  { 
+    int n=Sarray[i];
+    Larray[i]=n;
+    counter--,i++;
+    if(counter<0) counter=0;
+    //printf("the counter is %d the i is %d\n",counter,i);
+#pragma omp taskloop shared(counter)
+    for (int j=0; j<array_size; j++)
+    {
+      if( matrix[ ( n - 1 ) * array_size + j] == 1 )
       {
-        if( matrix[ ( n - 1 ) * array_size + j] == 1 )
+        matrix[ ( n - 1 ) * array_size + j] = false;
+        nodes[j].in_edges--;
+        if(nodes[j].in_edges == 0)
         {
-          matrix[ ( n - 1 ) * array_size + j] = false;
-          nodes[j].in_edges--;
-          if(nodes[j].in_edges == 0)
-          {
-            Sarray[counter+i]=nodes[j].id;
-            counter++;
-          }   
-        } 
-      }
+          Sarray[counter+i]=nodes[j].id;
+          counter++;
+        }   
+      } 
     }
-
-  if(i < array_size)
+  }
+}
+}
+  if(Larray[array_size-1] == 0)
   {
     perror("The graph contains one or more cycles!\n");
     exit(EXIT_FAILURE);
@@ -138,12 +144,9 @@ for (int i = 0; i < array_size; ++i) {
 
   else
   {
-    
     printf("Successful!\nThe Topological sort is: ");
-    for(int i=0; i<array_size; i++)
-    {
-      printf("%d ",Larray[i]);
-    }
+    return Larray;
   } 
-} 
+}
+
 
