@@ -20,7 +20,7 @@ double get_time(void)
   return tv.tv_sec + 1e-6 * tv.tv_usec;
 }
 
-int* Kahn_Algorithm(int *L,  struct node_info nodes[array_size], bool *matrix);
+int* Kahn_Algorithm(int threads,int *L,  struct node_info nodes[array_size], bool *matrix);
 
 /*
 ███    ███  █████  ██ ███    ██
@@ -75,7 +75,7 @@ int main(int argc, char **argv)
   free(temp1); free(temp2);
 
   t1=get_time();
-  L = Kahn_Algorithm(L, nodes, matrix);
+  L = Kahn_Algorithm(atoi(argv[1]),L, nodes, matrix);
   t2=get_time();
 
   free(nodes); free(matrix);
@@ -105,12 +105,12 @@ int main(int argc, char **argv)
 ██   ██ ██   ██ ██   ██ ██   ████
 */
 
-int* Kahn_Algorithm(int *L,  struct node_info nodes[array_size], bool *matrix)
+int* Kahn_Algorithm(int threads,int *L,  struct node_info nodes[array_size], bool *matrix)
 {
   int *S=(int *)malloc(array_size * (sizeof(int)));
   int counter=0,i=0;
 
-  #pragma omp parallel num_threads(argv[1]) shared(i,counter,array_size,matrix,L,S)
+  #pragma omp parallel num_threads(threads) shared(i,counter,array_size,matrix,L,S)
   {
 
     #pragma omp for reduction(+:S[:array_size])
