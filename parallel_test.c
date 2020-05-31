@@ -7,29 +7,32 @@
 
 int array_size, total_edges;
 
-struct node_info{
+struct node_info
+{
 int id;
 int in_edges;
 };
 
-struct Node{
+struct Node
+{
   struct node_info *data;
   struct Node *next;
 };
 
+
 int* Kahn_Algorithm(int *L,  struct node_info nodes[array_size], bool *matrix);
 
-
-double gettime(void) {
+double gettime(void)
+{
    struct timeval tv;
    gettimeofday(&tv, NULL);
    return tv.tv_sec + 1e-6 * tv.tv_usec;
 }
 
+int main(void)
+{
 
-int main(void) {
-
-  int iter,nodeItem;  
+  int iter; 
   static char data[500];
   double t1,t2;
   FILE *fp = fopen("dag.txt", "r");
@@ -57,7 +60,8 @@ int main(void) {
   int* temp1 = (int *)malloc(total_edges * sizeof(int)); 
   int* temp2 = (int *)malloc(total_edges * sizeof(int)); 
      
-  for( iter=0; iter<total_edges; iter++){ 
+  for( iter=0; iter<total_edges; iter++)
+  { 
      fgets(data, sizeof(data), fp); 
      fscanf(fp, "%d %d", &temp1[iter],&temp2[iter]); 
      matrix[(temp1[iter] - 1 )* array_size + ( temp2[iter] - 1 )] = 1;
@@ -68,10 +72,9 @@ int main(void) {
   Larray = Kahn_Algorithm(Larray,  nodes, matrix); 
   t2=gettime();
 
-  for(int i=0; i<array_size; i++)
-  {
+  for(int i=0; i<array_size; i++) 
     printf("%d ",Larray[i]);
-  }
+  
 
   printf("\n"); 
   printf("time %lf  \n",t2-t1);
@@ -84,20 +87,10 @@ int main(void) {
 int* Kahn_Algorithm(int *Larray,  struct node_info nodes[array_size], bool *matrix)
 { 
   int *Sarray=(int *)malloc(array_size * (sizeof(int)));
-  unsigned  int counter=0,i=0;
+  int counter=0,i=0;
 
-#pragma omp parallel  num_threads(4) shared(array_size,matrix,Larray,counter,Sarray)
+#pragma omp parallel  num_threads(4) shared(i,counter,array_size,matrix,Larray,Sarray)
 {
-  int tid=omp_get_thread_num();
-  int ssubarray[array_size];
-  int start = tid*(array_size/omp_get_num_threads());
-  int end;
-  if (tid < 3) {
-    end=(tid+1)*(array_size/4); 
-  }
-  else {
-    end=array_size;
-  }
 
 #pragma omp for reduction(+:Sarray[:array_size])
   for(int i=0; i<array_size; i++)
@@ -105,38 +98,40 @@ int* Kahn_Algorithm(int *Larray,  struct node_info nodes[array_size], bool *matr
     if(nodes[i].in_edges == 0)
     { 
 #pragma omp critical
-      Sarray[counter]=nodes[i].id;
-      counter++;
+      {
+        Sarray[counter]=nodes[i].id;
+        counter++;
+      }
     } 
   }  
 
 #pragma omp single
 {
-  for(int k=0; k<array_size; k++)
-  { 
-    int n=Sarray[i];
-    Larray[i]=n;
-    counter--,i++;
-    if(counter<0) counter=0;
-    //printf("the counter is %d the i is %d\n",counter,i);
-#pragma omp taskloop shared(counter)
-    for (int j=0; j<array_size; j++)
-    {
-      if( matrix[ ( n - 1 ) * array_size + j] == 1 )
+    for(int k=0; k<array_size; k++)
+    { 
+      int n=Sarray[i];
+      Larray[i]=n;
+      counter--,i++;
+      if(counter<0) counter=0;
+#pragma omp taskloop 
+      for (int j=0; j<array_size; j++)
       {
-        matrix[ ( n - 1 ) * array_size + j] = false;
-        nodes[j].in_edges--;
-        if(nodes[j].in_edges == 0)
+        if( matrix[ ( n - 1 ) * array_size + j] == 1 )
         {
-          Sarray[counter+i]=nodes[j].id;
-          counter++;
-        }   
-      } 
+          matrix[ ( n - 1 ) * array_size + j] = false;
+          nodes[j].in_edges--;
+          if(nodes[j].in_edges == 0)
+          {
+            Sarray[counter+i]=nodes[j].id;
+#pragma omp critical
+            counter++;
+          }
+        }
+      }
     }
   }
 }
-}
-  if(Larray[array_size-1] == 0)
+  if(Larray[array_size -1 ]==0)
   {
     perror("The graph contains one or more cycles!\n");
     exit(EXIT_FAILURE);
