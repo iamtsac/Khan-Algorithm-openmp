@@ -89,15 +89,15 @@ int* Kahn_Algorithm(int *Larray,  struct node_info nodes[array_size], bool *matr
   int *Sarray=(int *)malloc(array_size * (sizeof(int)));
   int counter=0,i=0;
 
-#pragma omp parallel  num_threads(4) shared(i,counter,array_size,matrix,Larray,Sarray)
-{
+  #pragma omp parallel  num_threads(8) shared(i,counter,array_size,matrix,Larray,Sarray)
+  {
 
-#pragma omp for reduction(+:Sarray[:array_size])
+  #pragma omp for reduction(+:Sarray[:array_size])
   for(int i=0; i<array_size; i++)
   {
     if(nodes[i].in_edges == 0)
     { 
-#pragma omp critical
+      #pragma omp critical
       {
         Sarray[counter]=nodes[i].id;
         counter++;
@@ -105,32 +105,32 @@ int* Kahn_Algorithm(int *Larray,  struct node_info nodes[array_size], bool *matr
     } 
   }  
 
-#pragma omp single
-{
-    for(int k=0; k<array_size; k++)
-    { 
-      int n=Sarray[i];
-      Larray[i]=n;
-      counter--,i++;
-      if(counter<0) counter=0;
-#pragma omp taskloop 
-      for (int j=0; j<array_size; j++)
-      {
-        if( matrix[ ( n - 1 ) * array_size + j] == 1 )
+  #pragma omp single
+  {
+      for(int k=0; k<array_size; k++)
+      { 
+        int n=Sarray[i];
+        Larray[i]=n;
+        counter--,i++;
+        if(counter<0) counter=0;
+        #pragma omp taskloop 
+        for (int j=0; j<array_size; j++)
         {
-          matrix[ ( n - 1 ) * array_size + j] = false;
-          nodes[j].in_edges--;
-          if(nodes[j].in_edges == 0)
+          if( matrix[ ( n - 1 ) * array_size + j] == 1 )
           {
-            Sarray[counter+i]=nodes[j].id;
-#pragma omp critical
-            counter++;
+            matrix[ ( n - 1 ) * array_size + j] = false;
+            nodes[j].in_edges--;
+            if(nodes[j].in_edges == 0)
+            {
+              Sarray[counter+i]=nodes[j].id;
+              #pragma omp critical
+              counter++;
+            }
           }
         }
       }
     }
   }
-}
   if(Larray[array_size -1 ]==0)
   {
     perror("The graph contains one or more cycles!\n");
