@@ -2,8 +2,10 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdbool.h>
+#include <time.h>
 
 int array_size, total_edges;
+double t1,t2;
 
 struct node_info{
 int id;
@@ -58,26 +60,54 @@ void push (struct queue *q,struct node_info *newData){ // vazei sto telos ths ou
   }
 }
 
+
+double gettime(void) {
+   struct timeval tv;
+   gettimeofday(&tv, NULL);
+   return tv.tv_sec + 1e-6 * tv.tv_usec;
+}
+
+
+
 struct queue Kahn_Algorithm(struct queue *L, struct queue *S, struct node_info nodes[array_size], bool matrix[array_size][array_size])
 {
-
+	long before = clock();
     while(S->size > 0){
+
       int count = 0;
+
       struct node_info *n = pop(S);
+
       push(L,n);
+
+	
+      t1=gettime();
       for (int i=0; i<array_size; i++)
       {
+
         if( matrix[n->id - 1][i] == 1 )
         {
+
           matrix[n->id - 1][i] = false;
           nodes[i].in_edges--;
           nodes[n->id - 1].out_edges--;
+
+
           if(nodes[i].in_edges == 0)
-          push(S,&nodes[i]);
+         	 push(S,&nodes[i]);
+
         }
       }
+      
+      
       count++;
     }
+
+
+    t2=gettime();
+    printf("time %lf  \n",t2-t1);
+ 
+
 
     if(L->size < array_size)
     {
@@ -90,6 +120,7 @@ struct queue Kahn_Algorithm(struct queue *L, struct queue *S, struct node_info n
       return *L;
     }
 }
+
 
 
 /****************************************************************/
@@ -121,6 +152,7 @@ int main(void)
 
   struct node_info nodes[array_size]; // array of nodes
   struct queue q;
+
   init(&q); //create of queue
 
   for(int i=0; i<array_size; i++)
@@ -131,6 +163,7 @@ int main(void)
   }
 
   bool matrix[array_size][array_size]; // array of edges between nodes
+
   for(int i=0; i<array_size; i++)
   {
     for(int j=0; j<array_size; j++)
@@ -181,12 +214,26 @@ int main(void)
   L = Kahn_Algorithm(&L, &S, nodes, matrix);
 
   struct node_info  *nodeItem;
-  for(int i=0; i<array_size; i++){
+
+  for(int i=0; i<array_size; i++)
+  {
+
+
   nodeItem = pop(&L);
   printf("%d ",nodeItem->id);
+
+
 }
   printf("\n");
 
   fclose(fp);
 return 0;
-} 
+}
+
+
+
+
+
+
+
+
