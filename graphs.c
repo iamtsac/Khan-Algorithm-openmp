@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 
 	fclose(outfile);
 
-  sprintf(command, "sed -i '1s/^/\\n%d %d %d\\n/' dag.txt", nodes, nodes, edges);
+  sprintf(command, "sed -i '1s/^/%d %d %d\\n/' dag.txt", nodes, nodes, edges);
 
 	system(command);
 
