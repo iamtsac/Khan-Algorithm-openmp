@@ -29,6 +29,7 @@ int* Kahn_Algorithm(int *L,  struct node_info nodes[array_size], bool *matrix);
 ██  ██  ██ ██   ██ ██ ██  ██ ██
 ██      ██ ██   ██ ██ ██   ████
 */
+
 int main(int argc, char **argv)
 {
   static char data[50];
@@ -77,13 +78,15 @@ int main(int argc, char **argv)
   L = Kahn_Algorithm(L, nodes, matrix);
   t2=get_time();
 
-  free(nodes); free(marix);
+  free(nodes); free(matrix);
 
   printf("Successful!\nThe Topological sort is: \n");
   for(int i=0; i<array_size; i++)
-  if(i%30 == 0)
-    printf("\n");
-  printf("%d ",L[i]);
+  {
+    if(i%30 == 0)
+      printf("\n");
+      printf("%d ",L[i]);
+  }
 
   free(L);
 
@@ -101,6 +104,7 @@ int main(int argc, char **argv)
 ██  ██  ██   ██ ██   ██ ██  ██ ██
 ██   ██ ██   ██ ██   ██ ██   ████
 */
+
 int* Kahn_Algorithm(int *L,  struct node_info nodes[array_size], bool *matrix)
 {
   int *S=(int *)malloc(array_size * (sizeof(int)));
