@@ -22,11 +22,24 @@ double get_time(void)
 
 int* Kahn_Algorithm(int *L,  struct node_info nodes[array_size], bool *matrix);
 
-int main(void)
+/*
+███    ███  █████  ██ ███    ██
+████  ████ ██   ██ ██ ████   ██
+██ ████ ██ ███████ ██ ██ ██  ██
+██  ██  ██ ██   ██ ██ ██  ██ ██
+██      ██ ██   ██ ██ ██   ████
+*/
+int main(int argc, char **argv)
 {
   static char data[50];
   double t1,t2;
   FILE *fp = fopen("dag.txt", "r");
+
+  if(argv[1] == NULL)
+  {
+    perror("You have to declare the number of threads!\n");
+    exit(EXIT_FAILURE);
+  }
 
   if(fp == NULL)
   {
@@ -38,8 +51,7 @@ int main(void)
   printf("Array size: %d x %d with %d edges\n",array_size,array_size,total_edges);
  
   struct node_info *nodes = (struct node_info *)malloc(array_size* sizeof(struct node_info));
-
-
+  
   for(int i=0; i<array_size; i++)
   {
     nodes[i].id = i+1;
@@ -47,50 +59,54 @@ int main(void)
   }
 
   bool *matrix = (bool *)malloc(array_size *array_size * sizeof(bool));
-  int *L=(int *)malloc(array_size * sizeof(int));
+  int *L = (int *)malloc(array_size * sizeof(int));
   int *temp1 = (int *)malloc(total_edges * sizeof(int));
   int *temp2 = (int *)malloc(total_edges * sizeof(int));
 
-  for(int i=0; i < total_edges; i++)
+  for(int i=0; i<total_edges; i++)
   {
     fgets(data, sizeof(data), fp);
     fscanf(fp, "%d %d", &temp1[i],&temp2[i]);
-    matrix[(temp1[i]-1)* array_size + ( temp2[i] - 1 )] = true;
-    nodes[temp2[i]-1].in_edges++;
+    matrix[(temp1[i] - 1 )* array_size + ( temp2[i] - 1 )] = 1;
+    nodes[temp2[i] - 1 ].in_edges++;
   }
 
   free(temp1); free(temp2);
 
-  t1 = get_time();
+  t1=get_time();
+  L = Kahn_Algorithm(L, nodes, matrix);
+  t2=get_time();
 
-  L = Kahn_Algorithm(L,  nodes, matrix); 
+  free(nodes); free(marix);
 
-  t2 = get_time();
-
-
-  printf("Successful!\nThe Topological sort is: ");
+  printf("Successful!\nThe Topological sort is: \n");
   for(int i=0; i<array_size; i++)
-  {
-    if(i%30 == 0)
-      printf("\n");
-    printf("%d ", L[i]);
-  }
+  if(i%30 == 0)
+    printf("\n");
+  printf("%d ",L[i]);
 
   free(L);
- 
-  printf("\n\nThe algorithm took %lf seconds to complete. \n",t2-t1);
+
+  printf("\n\nThe algorithm took %lf seconds to complete.\n", t2-t1);
 
   fclose(fp);
 
-return 0;
+  return 0;
 }
 
+/*
+██   ██  █████  ██   ██ ███    ██
+██  ██  ██   ██ ██   ██ ████   ██
+█████   ███████ ███████ ██ ██  ██
+██  ██  ██   ██ ██   ██ ██  ██ ██
+██   ██ ██   ██ ██   ██ ██   ████
+*/
 int* Kahn_Algorithm(int *L,  struct node_info nodes[array_size], bool *matrix)
 {
-  int *S = (int *)malloc(array_size * (sizeof(int)));
+  int *S=(int *)malloc(array_size * (sizeof(int)));
   int counter=0,i=0;
 
-  #pragma omp parallel shared(array_size,matrix,L,counter,S)
+  #pragma omp parallel num_threads(argv[1]) shared(i,counter,array_size,matrix,L,S)
   {
 
     #pragma omp for reduction(+:S[:array_size])
@@ -99,28 +115,35 @@ int* Kahn_Algorithm(int *L,  struct node_info nodes[array_size], bool *matrix)
       if(nodes[i].in_edges == 0)
       {
         #pragma omp critical
-        S[counter]=nodes[i].id;
-        counter++;
+        {
+          S[counter]=nodes[i].id;
+          counter++;
+        }
       }
     }
 
     #pragma omp single
-    for(int k=0; k<array_size; k++)
     {
-      int n = S[i];
-      L[i] = n;
-      counter--, i++;
-      #pragma omp taskloop
-      for (int j=0; j < array_size; j++)
+      for(int k=0; k<array_size; k++)
       {
-        if( matrix[(n-1) * array_size + j] == true )
+        int n=S[i];
+        L[i]=n;
+        counter--,i++;
+        if(counter<0) counter=0;
+
+        #pragma omp taskloop
+        for (int j=0; j<array_size; j++)
         {
-          matrix[(n-1) * array_size + j] = false;
-          nodes[j].in_edges--;
-          if(nodes[j].in_edges == 0)
+          if( matrix[ (n-1) * array_size + j] == 1 )
           {
-            S[counter+i]=nodes[j].id;
-            counter++;
+            matrix[ (n-1) * array_size + j] = false;
+            nodes[j].in_edges--;
+            if(nodes[j].in_edges == 0)
+            {
+              S[counter+i]=nodes[j].id;
+              #pragma omp critical
+              counter++;
+            }
           }
         }
       }
@@ -129,7 +152,7 @@ int* Kahn_Algorithm(int *L,  struct node_info nodes[array_size], bool *matrix)
 
   free(S);
 
-  if(L[array_size-1] == 0)
+  if(L[array_size-1]==0)
   {
     perror("The graph contains one or more cycles!\n");
     exit(EXIT_FAILURE);
