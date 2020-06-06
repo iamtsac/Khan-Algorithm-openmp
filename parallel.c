@@ -7,7 +7,7 @@
 
 int array_size, total_edges;
 
-struct node_info // δημιουργουμε το struct που περιεχει τους κομβους και πληροφορίες για αυτους.
+struct node_info // Δημιουργουμε το struct που περιεχει τους κομβους και πληροφορίες για αυτους.
 {
   int id;
   int in_edges;
@@ -65,8 +65,8 @@ int main(int argc, char **argv)
   int *temp1 = (int *)malloc(total_edges * sizeof(int));
   int *temp2 = (int *)malloc(total_edges * sizeof(int));
 
-  // αρχικοποιουμε το μητρωο γειτνιασης και μετραμε τις εισερχομενες ακμες
-  // καθε κομβου διαβαζοντας τις πληροφορίες απο το αρχειο.  
+  // Αρχικοποιουμε το μητρωο γειτνιασης και μετραμε τις εισερχομενες ακμες
+  // Καθε κομβου διαβαζοντας τις πληροφορίες απο το αρχειο.  
   for(int i=0; i<total_edges; i++)
   {
     fgets(data, sizeof(data), fp);
@@ -138,11 +138,11 @@ int* Kahn_Algorithm(int threads,int *L,  struct node_info nodes[array_size], boo
           {
             matrix[ (n-1) * array_size + j] = false; // Στο μητρωο σβηνουμε τις εξερχομενες ακμες του στοιχειου που πηραμε απο τον πινακα S.
             nodes[j].in_edges--; // Και ενημερωνουμε το struct για τον αριθμο των εισερχομενων ακμων.
-            if(nodes[j].in_edges == 0) //αν καποιος κομβος δεν εχει εισερχομενες ακμες τον βαζουμε στον S.
+            if(nodes[j].in_edges == 0) // Αν καποιος κομβος δεν εχει εισερχομενες ακμες τον βαζουμε στον S.
             {
               #pragma omp critical
               {
-                S[counter+i]=nodes[j].id; // η θεση counter+i ειναι παντα η αμεσως επομενη αδεια θεση του S οποτε δεν υπαρχουν κενες θεσεις μεταξυ των στοιχειων.
+                S[counter+i]=nodes[j].id; // Η θεση counter+i ειναι παντα η αμεσως επομενη αδεια θεση του S οποτε δεν υπαρχουν κενες θεσεις μεταξυ των στοιχειων.
                 counter++;
               }
             }
