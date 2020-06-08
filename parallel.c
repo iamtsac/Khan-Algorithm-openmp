@@ -58,7 +58,7 @@ int main(int argc, char **argv)
   }
 
   // Αρχικοποιουμε δυναμικα τους παρακατω πινακες για να μπορουμε να δουλεψουμε σε πολυ μεγαλα γραφηματα.
-  bool *matrix = (bool *)malloc( pow(array_size,2) * sizeof(bool));
+  bool *matrix = (bool *)malloc( array_size * array_size * sizeof(bool));
   int *L = (int *)malloc(array_size * sizeof(int));
   int *temp1 = (int *)malloc(total_edges * sizeof(int));
   int *temp2 = (int *)malloc(total_edges * sizeof(int));
@@ -72,13 +72,11 @@ int main(int argc, char **argv)
     nodes[temp2[i]].in_edges++;
   }
 
-  free(temp1),free(temp2);
 
   t1=get_time();
   L = Kahn_Algorithm(atoi(argv[1]),L, nodes, matrix);
   t2=get_time(); 
 
-  free(matrix);
 
   printf("Successful!\nThe Topological sort is: \n");
   for(int i=0; i<array_size; i++)
@@ -87,11 +85,10 @@ int main(int argc, char **argv)
     printf("%d ",L[i]);
   } 
 
-  printf("%d the edges\n",total_edges);
-  free(L);
 
   printf("\n\nThe algorithm took %lf seconds to complete.\n", t2-t1);
 
+  free(L), free(matrix),free(temp1),free(temp2);
   fclose(fp);
 
   return 0;
@@ -137,7 +134,6 @@ int* Kahn_Algorithm(int threads,int *L,  struct node_info *nodes, bool *matrix)
             matrix[n * array_size + j] = false; // Στο μητρωο σβηνουμε τις εξερχομενες ακμες του στοιχειου που πηραμε απο τον πινακα S.
             nodes[j].in_edges--; // Και ενημερωνουμε το struct για τον αριθμο των εισερχομενων ακμων.
             total_edges--;
-            //printf("%d the edges\n",total_edges);
 
             if(nodes[j].in_edges == 0) // Αν καποιος κομβος δεν εχει εισερχομενες ακμες τον βαζουμε στον S.
             {
@@ -161,7 +157,6 @@ int* Kahn_Algorithm(int threads,int *L,  struct node_info *nodes, bool *matrix)
 
   else
   {
-    free(S);
     return L;
   }
 }
