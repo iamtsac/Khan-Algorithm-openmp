@@ -133,7 +133,7 @@ int* Kahn_Algorithm(int threads,int *L,  struct node_info *nodes, bool *matrix)
           {
             matrix[n * array_size + j] = false; // Στο μητρωο σβηνουμε τις εξερχομενες ακμες του στοιχειου που πηραμε απο τον πινακα S.
             nodes[j].in_edges--; // Και ενημερωνουμε το struct για τον αριθμο των εισερχομενων ακμων.
-            total_edges--;
+            //total_edges--;
 
             if(nodes[j].in_edges == 0) // Αν καποιος κομβος δεν εχει εισερχομενες ακμες τον βαζουμε στον S.
             {
